@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+	</head>
+	<body>
+	
+	<p>Test <strong data-bind="text: Test"></strong></p>
+		
+		<div>
+			<p>Ressources</p>
+			<div data-bind="foreach: ExistingRessources().Ressources()">
+				<div>
+					<div data-bind="text: Name"></div>
+					<div data-bind="text: Description"></div>
+				</div>
+			</div>
+		</div>
+		
+		
+		
+		<script src="Scripts/knockout-3.4.0.js"></script>
+		<script src="Scripts/ressource.js"></script>
+		<script src="Scripts/ressources.js"></script>
+		<script src="Scripts/player.js"></script>
+		<script src="Scripts/systemeInfos.js"></script>
+	</body>
+</html>
