@@ -1,10 +1,12 @@
 function SystemeInfos(){
 	
 	var ressources = ko.observableArray();
-	ressources.push(new Ressource("Minerai", "Du minerai", ""));
-	ressources.push(new Ressource("Bois", "Du bois", ""));
+	ressources.push(new Ressource("Minerai", "Du minerai", "./Content/imgs/metal.jpg"));
+	ressources.push(new Ressource("Bois", "Du bois", "./Content/imgs/wood.jpg"));
 	
-	this.ExistingRessources = ko.observable(new Ressources(ressources));
+	this.ExistingRessources = new Ressources(ressources);
+	
+	this.Player = ko.observable(new Player(this.ExistingRessources));
 	
 	this.Test = ko.observable("Test");
 }
