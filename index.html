@@ -21,15 +21,64 @@
     <p>Player</p>
     <div data-bind="foreach: Player().QuantifiedRessources().QuantifiedRessources()">
         <div>
-            <img data-bind="attr: { src: Ressource().ImagePath() }" style="width : 50px;" class="icon" /> : <strong data-bind="text: Quantity"></strong>
+            <img data-bind="attr: { src: Ressource().ImagePath() }" style="width : 15px;" class="icon" /> : <strong data-bind="text: Quantity"></strong>
         </div>
     </div>
 </div>
 
+<div>
+    <p>Modules</p>
+    <div data-bind="foreach: ExistingModules.Modules()">
+        <div data-bind="foreach: Price.QuantifiedRessources()">
+            <div>
+                <img data-bind="attr: { src: Ressource().ImagePath() }" style="width : 15px;" class="icon" /> : <strong data-bind="text: Quantity"></strong>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div>
+    <p>Skeletons</p>
+    <div>
+        <select data-bind="options: ExistingSkeletons.Skeletons(),
+                           optionsText: function(item){ return item.Name},
+                           value: CurrentDroneSkeleton">
+        </select>
+    </div>
+</div>
+
+<div data-bind="visible: CurrentDroneSkeleton()">
+    <p>Current Skeleton</p>
+    <div data-bind="foreach: CurrentDroneSkeleton().ModulesEmplacements()" style="width: 1000px; height: 1000px; background-color: blue; position: relative">
+        <div data-bind="style: {
+                    position : 'absolute',
+                    left: Position().X(),
+                    top: Position().Y()
+                }"
+             style="width : 40px;
+                    height: 40px;
+                    border-style: groove;
+                    border-width: 2px;
+                    border-color: darkseagreen"
+        >
+            <img data-bind="attr:
+                {
+                    src: Module().ImgPath()
+                }"
+            />
+        </div>
+    </div>
+</div>
 
 <script src="Scripts/knockout-3.4.0.js"></script>
+<script src="Scripts/position.js"></script>
+<script src="Scripts/module.js"></script>
+<script src="Scripts/moduleEmplacement.js"></script>
+<script src="Scripts/droneSkeleton.js"></script>
 <script src="Scripts/ressource.js"></script>
 <script src="Scripts/ressources.js"></script>
+<script src="Scripts/price.js"></script>
+<script src="Scripts/module.js"></script>
 <script src="Scripts/player.js"></script>
 <script src="Scripts/systemeInfos.js"></script>
 </body>
