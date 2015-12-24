@@ -5,33 +5,33 @@ function SystemeInfos(){
 	ressources.push(new Ressource("Bois", "Du bois", "./Content/imgs/wood.jpg"));
 	this.ExistingRessources = new Ressources(ressources);
 
-	var modules = ko.observableArray();
-	var moduleOneNecessaryQuantifiedRessources = ko.observableArray();
-	moduleOneNecessaryQuantifiedRessources.push(new QuantityOfRessource(this.ExistingRessources.GetRessourceByName("Minerai"), 10));
-	moduleOneNecessaryQuantifiedRessources.push(new QuantityOfRessource(this.ExistingRessources.GetRessourceByName("Bois"), 20));
+	var price1 = new Price();
+	price1.AddQuantityRessource(new QuantityOfRessource(this.ExistingRessources.GetRessourceByName("Minerai"), 10));
+	price1.AddQuantityRessource(new QuantityOfRessource(this.ExistingRessources.GetRessourceByName("Bois"), 20));
 
-	var moduleTwoNecessaryQuantifiedRessources = ko.observableArray();
-	moduleTwoNecessaryQuantifiedRessources.push(new QuantityOfRessource(ressources()[0], 40));
-	moduleTwoNecessaryQuantifiedRessources.push(new QuantityOfRessource(ressources()[1], 5));
+	var price2 = new Price();
+	price2.AddQuantityRessource(new QuantityOfRessource(this.ExistingRessources.GetRessourceByName("Minerai"), 40));
+	price2.AddQuantityRessource(new QuantityOfRessource(this.ExistingRessources.GetRessourceByName("Bois"), 5));
 
-	modules.push(new Module(new Price(moduleOneNecessaryQuantifiedRessources)));
-	modules.push(new Module(new Price(moduleTwoNecessaryQuantifiedRessources)));
+	this.ExistingModules = new Modules([
+		new Module(price1, 0, "./Content/imgs/modules/module1.jpg"),
+		new Module(price2, 1, "./Content/imgs/modules/module2.jpg")
+	]);
 
-	this.ExistingModules = new Modules(modules);
-
+	/* skeletons */
 	var skeletons = ko.observableArray();
 	var firstSkeleton = new DroneSkeleton();
 	firstSkeleton.Name = "first";
-	firstSkeleton.ModulesEmplacements.push(new ModuleEmplacement(new Position('200px','400px')));
-	firstSkeleton.ModulesEmplacements.push(new ModuleEmplacement(new Position('300px','500px')));
+	firstSkeleton.AddModuleEmplacement(new ModuleEmplacement(new Position('200px','400px'), this));
+	firstSkeleton.AddModuleEmplacement(new ModuleEmplacement(new Position('300px','500px'), this));
 	this.CurrentDroneSkeleton = ko.observable();
 
 	skeletons.push(firstSkeleton);
 
 	var secondSkeleton = new DroneSkeleton();
 	secondSkeleton.Name = "second";
-	secondSkeleton.ModulesEmplacements.push(new ModuleEmplacement(new Position('50px','200px')));
-	secondSkeleton.ModulesEmplacements.push(new ModuleEmplacement(new Position('500px','300px')));
+	secondSkeleton.AddModuleEmplacement(new ModuleEmplacement(new Position('50px','200px'), this));
+	secondSkeleton.AddModuleEmplacement(new ModuleEmplacement(new Position('500px','300px'), this));
 
 	skeletons.push(secondSkeleton);
 
@@ -40,6 +40,8 @@ function SystemeInfos(){
 	this.Player = ko.observable(new Player(this.ExistingRessources));
 	
 	this.Test = ko.observable("Test");
+
+
 }
 
 var sysInfos = new SystemeInfos();

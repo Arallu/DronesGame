@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 </head>
 <body>
 
@@ -29,9 +30,17 @@
 <div>
     <p>Modules</p>
     <div data-bind="foreach: ExistingModules.Modules()">
-        <div data-bind="foreach: Price.QuantifiedRessources()">
-            <div>
-                <img data-bind="attr: { src: Ressource().ImagePath() }" style="width : 15px;" class="icon" /> : <strong data-bind="text: Quantity"></strong>
+        <div draggable="true"
+             data-bind="event:
+             {
+                dragstart: function(data, event){ console.log('test'); DragStart(data, event); return true;},
+                dragend: function(event){ console.log('end')}
+             }">
+            <img data-bind="attr: { src: ImgPath()}" style="width : 15px;" class="icon" />
+            <div data-bind="foreach: Price.QuantifiedRessources()" >
+                <div>
+                    <img data-bind="attr: { src: Ressource().ImagePath() }" style="width : 15px;" class="icon" /> : <strong data-bind="text: Quantity"></strong>
+                </div>
             </div>
         </div>
     </div>
@@ -49,8 +58,20 @@
 
 <div data-bind="visible: CurrentDroneSkeleton()">
     <p>Current Skeleton</p>
+    <div data-bind="foreach: CurrentDroneSkeleton().TotalPrice().QuantifiedRessources()">
+        <div>
+            <img data-bind="attr: { src: Ressource().ImagePath() }" style="width : 15px;" class="icon" /> : <strong data-bind="text: Quantity"></strong>
+        </div>
+    </div>
     <div data-bind="foreach: CurrentDroneSkeleton().ModulesEmplacements()" style="width: 1000px; height: 1000px; background-color: blue; position: relative">
-        <div data-bind="style: {
+        <div data-bind="event:
+                {
+                    dragover: function(event){ console.log('dragover')},
+                    dragenter: function(event){ console.log('dragenter')},
+                    dragleave: function(event){ console.log('dragleave')},
+                    drop: function(data, event){ console.log('drop'); Drop(data, event)}
+                },
+                style: {
                     position : 'absolute',
                     left: Position().X(),
                     top: Position().Y()
@@ -65,8 +86,10 @@
                 {
                     src: Module().ImgPath()
                 }"
+                style="width : 40px;height: 40px;" class="icon"
             />
         </div>
+
     </div>
 </div>
 
@@ -81,5 +104,37 @@
 <script src="Scripts/module.js"></script>
 <script src="Scripts/player.js"></script>
 <script src="Scripts/systemeInfos.js"></script>
+<script>
+    (function() {
+        var _dragged;
+        ko.bindingHandlers.drag = {
+            init: function(element, valueAccessor, allBindingsAccessor, viewModel) {
+                var dragElement = $(element);
+                var dragOptions = {
+                    helper: 'clone',
+                    revert: true,
+                    revertDuration: 0,
+                    start: function() {
+                        _dragged = ko.utils.unwrapObservable(valueAccessor().value);
+                    },
+                    cursor: 'default'
+                };
+                dragElement.draggable(dragOptions).disableSelection();
+            }
+        };
+
+        ko.bindingHandlers.drop = {
+            init: function(element, valueAccessor, allBindingsAccessor, viewModel) {
+                var dropElement = $(element);
+                var dropOptions = {
+                    drop: function(event, ui) {
+                        valueAccessor().value(_dragged);
+                    }
+                };
+                dropElement.droppable(dropOptions);
+            }
+        };
+    })();
+</script>
 </body>
 </html>
