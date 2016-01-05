@@ -1,22 +1,13 @@
+var ESystemeInfosMode = { "None":1, "ActionAffectation":2};
+Object.freeze(ESystemeInfosMode);
+
 function SystemeInfos(){
-	
-	var ressources = ko.observableArray();
-	ressources.push(new Ressource("Minerai", "Du minerai", "./Content/imgs/metal.jpg"));
-	ressources.push(new Ressource("Bois", "Du bois", "./Content/imgs/wood.jpg"));
-	this.ExistingRessources = new Ressources(ressources);
-
-	var price1 = new Price();
-	price1.AddQuantityRessource(new QuantityOfRessource(this.ExistingRessources.GetRessourceByName("Minerai"), 10));
-	price1.AddQuantityRessource(new QuantityOfRessource(this.ExistingRessources.GetRessourceByName("Bois"), 20));
-
-	var price2 = new Price();
-	price2.AddQuantityRessource(new QuantityOfRessource(this.ExistingRessources.GetRessourceByName("Minerai"), 40));
-	price2.AddQuantityRessource(new QuantityOfRessource(this.ExistingRessources.GetRessourceByName("Bois"), 5));
-
-	this.ExistingModules = new Modules([
-		new Module(price1, 0, "./Content/imgs/modules/module1.jpg"),
-		new Module(price2, 1, "./Content/imgs/modules/module2.jpg")
-	]);
+	this.ExistingRessources = null;
+	this.ExistingHeroes = new Array();
+	this.Canvas = null;
+	this.Map = null;
+	this.Mode = ko.observable(ESystemeInfosMode.None);
+	this.ActionAffectationMode = ko.observable(this.Mode() == ESystemeInfosMode.ActionAffectation);
 
 	/* skeletons */
 	var skeletons = ko.observableArray();
@@ -37,12 +28,103 @@ function SystemeInfos(){
 
 	this.ExistingSkeletons = new DroneSkeletons(skeletons);
 
-	this.Player = ko.observable(new Player(this.ExistingRessources));
+	this.Player = null;
 	
 	this.Test = ko.observable("Test");
 
+	/* TODO : permettre achat robot pour l'ajouter aux possessions du Player */
+	this.PlayerCanBuy = function(){
+		var can = this.Player().QuantifiedRessources().CanSubstractQuantifiedRessources(this.CurrentDroneSkeleton().TotalPrice().QuantifiedRessources);
+		return can;
+	}
 
+	this.Buy = function(){
+		/* this.Player && this.CurrentSkeleton */
+		this.Player().QuantifiedRessources().SubstractQuantifiedRessources(this.CurrentDroneSkeleton().TotalPrice().QuantifiedRessources);
+	}
+
+	this.Debug = function(data, event){
+		var d = data;
+		var e = event;
+
+	}
+
+	this.CurrentAffectation = ko.observable(new Affectation());
+
+	this.ValidateCurrentAffectation = function(){
+		var affectation = this.CurrentAffectation();
+		var e = 0;
+	}
+
+	this.CurrentAction = ko.observable(new StateGenericAction(EActionAffectationMode.FreeAffectation));
+
+	this.ExecuteAction = function(action){
+		this.Mode(ESystemeInfosMode.ActionAffectation);
+		this.ActionAffectationMode(this.Mode() == ESystemeInfosMode.ActionAffectation);
+		// TODO to remove
+		this.CurrentAffectation(action.Affectation);
+		this.CurrentAction(action);
+	}
+
+	this.MapClic = function(data, event){
+		var rect = this.Canvas.getBoundingClientRect();
+
+		var x = event.clientX - rect.left;
+		var y = event.clientY - rect.top;
+		console.log('mapClic: ' + x + ' ' + y);
+
+		this.CurrentlySelectedState = this.Map.ClicOn(x, y);
+// this.CurrentActions <= dépend du player et de l'état cliqué
+		this.CurrentlySelectedStateGenericActions.removeAll();
+
+		if (this.CurrentlySelectedState != null){
+			for (var i = 0; i < this.GenericStateActions.length; i++){
+				switch(this.GenericStateActions[i].GenericActionCondition){
+					// TODO : complete & refactor
+					case EGenericActionCondition.Owner:{
+						if (this.Player() === this.CurrentlySelectedState.CurrentOwner){
+							this.CurrentlySelectedStateGenericActions.push(this.GenericStateActions[i]);
+						}
+					}
+						break;
+					case EGenericActionCondition.None:{
+						this.CurrentlySelectedStateGenericActions.push(this.GenericStateActions[i]);
+					}
+						break;
+					default:;
+				}
+			}
+		}
+	}
+
+	this.GetHeroById = function(id){
+		for (var i = 0; i < this.ExistingHeroes.length; i++){
+			if (this.ExistingHeroes[i].Id.toString() == id){
+				return this.ExistingHeroes[i];
+			}
+		}
+
+		return null;
+	}
+
+	// TODO : voir si on garde cette structure par la suite
+	this.CurrentlySelectedState = null;
+	this.GenericStateActions = new Array();
+	var firstAction = new StateGenericAction(EActionAffectationMode.FreeAffectation);
+	firstAction.Name = 'Explore';
+	firstAction.GenericActionCondition = EGenericActionCondition.Owner;
+
+	var secondAction = new StateGenericAction(EActionAffectationMode.PlayerVsPlayer);
+	secondAction.Name = 'Invade';
+	secondAction.GenericActionCondition = EGenericActionCondition.None;
+
+	var thirdAction = new StateGenericAction(EActionAffectationMode.PlayerVsScore);
+	thirdAction.Name = 'Test';
+	thirdAction.GenericActionCondition = EGenericActionCondition.Neighbor;
+
+	this.GenericStateActions.push(firstAction);
+	this.GenericStateActions.push(secondAction);
+	this.GenericStateActions.push(thirdAction);
+
+	this.CurrentlySelectedStateGenericActions = ko.observableArray();
 }
-
-var sysInfos = new SystemeInfos();
-ko.applyBindings(sysInfos);

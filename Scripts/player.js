@@ -4,11 +4,15 @@
 
 function Player(existingRessources){
 	
-	var quantifiedRessources = ko.observableArray();
+	var quantifiedRessources = new QuantifiedRessources();
 	
 	for (var i = 0; i < existingRessources.Ressources().length; i++){
-		quantifiedRessources.push(new QuantityOfRessource(existingRessources.Ressources()[i], 0));
+		quantifiedRessources.AddQuantifiedRessource(new QuantityOfRessource(existingRessources.Ressources()[i], 100));
 	}
 	
-	this.QuantifiedRessources = ko.observable(new QuantifiedRessources(quantifiedRessources));
+	this.QuantifiedRessources = ko.observable(quantifiedRessources);
+
+	this.AffiliationColor = 'blue';
+
+	this.Heroes = ko.observableArray();
 }

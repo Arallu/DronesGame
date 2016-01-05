@@ -1,11 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style type="text/css">
 
+        .button_test{
+            border:1px solid #7d99ca; -webkit-border-radius: 3px; -moz-border-radius: 3px;border-radius: 3px;font-size:12px;font-family:arial, helvetica, sans-serif; padding: 10px 10px 10px 10px; text-decoration:none; display:inline-block;text-shadow: -1px -1px 0 rgba(0,0,0,0.3);font-weight:bold; color: #FFFFFF;
+            background-color: #a5b8da; background-image: -webkit-gradient(linear, left top, left bottom, from(#a5b8da), to(#7089b3));
+            background-image: -webkit-linear-gradient(top, #a5b8da, #7089b3);
+            background-image: -moz-linear-gradient(top, #a5b8da, #7089b3);
+            background-image: -ms-linear-gradient(top, #a5b8da, #7089b3);
+            background-image: -o-linear-gradient(top, #a5b8da, #7089b3);
+            background-image: linear-gradient(to bottom, #a5b8da, #7089b3);filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#a5b8da, endColorstr=#7089b3);
+        }
+
+        .button_test:hover{
+            border:1px solid #5d7fbc;
+            background-color: #819bcb; background-image: -webkit-gradient(linear, left top, left bottom, from(#819bcb), to(#536f9d));
+            background-image: -webkit-linear-gradient(top, #819bcb, #536f9d);
+            background-image: -moz-linear-gradient(top, #819bcb, #536f9d);
+            background-image: -ms-linear-gradient(top, #819bcb, #536f9d);
+            background-image: -o-linear-gradient(top, #819bcb, #536f9d);
+            background-image: linear-gradient(to bottom, #819bcb, #536f9d);filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#819bcb, endColorstr=#536f9d);
+        }
+
+        .button_action {
+            color: rgb(200,200,200);
+            text-shadow: 0px 1px 1px rgba(250,250,250,0.1);
+            font-size: 16pt;
+            display: block;
+            position: relative;
+            text-decoration: none;
+            background-color: rgb(83,87,93);
+            box-shadow: 0px 3px 0px 0px rgb(34,34,34), /* 1st Shadow */
+            0px 7px 10px 0px rgb(17,17,17), /* 1nd Shadow */
+            inset 0px 1px 1px 0px rgba(250, 250, 250, .2), /* 3rd Shadow */
+            inset 0px -12px 35px 0px rgba(0, 0, 0, .5); /* 4th Shadow */
+            width: 70px;
+            height: 70px;
+            border: 0;
+            border-radius: 35px;
+            text-align: center;
+            line-height: 79px;
+        }
+
+        .button_action:before {
+            content: "";
+            width: 80px;
+            height: 80px;
+            display: block;
+            z-index: -2;
+            position: absolute;
+            background-color: rgb(26,27,29);
+            left: -5px;
+            top: -2px;
+            border-radius: 40px;
+            box-shadow: 0px 1px 0px 0px rgba(250,250,250,0.1),
+            inset 0px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+    </style>
 </head>
 <body>
 
 <p>Test <strong data-bind="text: Test"></strong></p>
+
+<div id="map">
+    <canvas id="map_canvas" width="1000" height="600" data-bind="click: function(data,event) { $root.MapClic(data, event);}"></canvas>
+    <div data-bind="foreach: $root.CurrentlySelectedStateGenericActions()">
+        <button
+                data-bind="text: Name, click: function(data, event) {$root.ExecuteAction($data);}"
+                class="button_action"
+        ></button>
+    </div>
+    <div>Infos:
+        <!-- Informations sur l'état sélectionné  -->
+    </div>
+    <!-- Temp, l'affectation ne doit pas être accédée comme ça -->
+    <div data-bind="value: $root.CurrentAffectation()">
+        <div data-bind="visible: $root.ActionAffectationMode(), click: function(data, event) { $root.Debug($data, event);}" >
+            Affectation
+
+
+            <div data-bind="event:
+        {
+            dragover: function(event){ console.log('dragover on affectation')},
+            dragenter: function(event){ console.log('dragenter on affectation')},
+            dragleave: function(event){ console.log('dragleave on affectation')},
+            drop: function(data, event){ console.log('drop on affectation');  $root.CurrentAction().Affectation.Affectation.Drop(data, event, $root); }
+        }"
+                 style="width : 400px;
+                    height: 200px;
+                    border-style: groove;
+                    border-width: 2px;
+                    border-color: purple"
+            >
+                <div data-bind="foreach: $root.CurrentAction().Affectation.Affectation.Heroes">
+                    <strong data-bind="text: Name"></strong>
+                </div>
+                <button
+                        data-bind="click: function(data, event){ $root.ValidateCurrentAffectation();}"
+                        class="button_test"
+                >
+                    Validation
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
 
 <div>
     <p>Ressources</p>
@@ -20,6 +122,16 @@
 
 <div>
     <p>Player</p>
+    <div data-bind="foreach: Player().Heroes()">
+        <div draggable="true"
+             data-bind="event:
+             {
+                dragstart: function(data, event){ console.log('drag hero'); DragStart(data, event); return true;},
+                dragend: function(event){ console.log('end')}
+             }">
+            <strong data-bind="text: Name"></strong>
+        </div>
+    </div>
     <div data-bind="foreach: Player().QuantifiedRessources().QuantifiedRessources()">
         <div>
             <img data-bind="attr: { src: Ressource().ImagePath() }" style="width : 15px;" class="icon" /> : <strong data-bind="text: Quantity"></strong>
@@ -63,6 +175,9 @@
             <img data-bind="attr: { src: Ressource().ImagePath() }" style="width : 15px;" class="icon" /> : <strong data-bind="text: Quantity"></strong>
         </div>
     </div>
+    <div>
+        <button class="button_test" data-bind="enable: $root.PlayerCanBuy(), click: $root.Buy() " >Buy!</button>
+    </div>
     <div data-bind="foreach: CurrentDroneSkeleton().ModulesEmplacements()" style="width: 1000px; height: 1000px; background-color: blue; position: relative">
         <div data-bind="event:
                 {
@@ -95,6 +210,14 @@
 
 <script src="Scripts/knockout-3.4.0.js"></script>
 <script src="Scripts/position.js"></script>
+<script src="Scripts/heroes/affectation.js"></script>
+<script src="Scripts/stateGenericAction.js"></script>
+<script src="Scripts/heroes/hero.js"></script>
+<script src="Scripts/drawing/shape.js"></script>
+<script src="Scripts/drawing/state.js"></script>
+<script src="Scripts/drawing/continent.js"></script>
+<script src="Scripts/drawing/map.js"></script>
+<script src="Scripts/land.js"></script>
 <script src="Scripts/module.js"></script>
 <script src="Scripts/moduleEmplacement.js"></script>
 <script src="Scripts/droneSkeleton.js"></script>
@@ -135,6 +258,313 @@
             }
         };
     })();
+
+    var canvas = document.getElementById('map_canvas');
+    var context = canvas.getContext('2d');
+
+    var koRessources = ko.observableArray();
+    koRessources.push(new Ressource("Minerai", "Du minerai", "./Content/imgs/metal.jpg"));
+    koRessources.push(new Ressource("Bois", "Du bois", "./Content/imgs/wood.jpg"));
+    var ressources = new Ressources(koRessources);
+
+    /* Player 1*/
+    var player1 = new Player(ressources);
+    player1.AffiliationColor = 'green';
+    var hero11 = new Hero();
+    hero11.Name = "John";
+    hero11.Caracteristique1 = 2;
+    hero11.Caracteristique2 = 5;
+    hero11.Id = 0;
+
+    var hero12 = new Hero();
+    hero12.Name = "July";
+    hero12.Caracteristique1 = 5;
+    hero12.Caracteristique2 = 2;
+    hero12.Id = 1;
+
+    var hero13 = new Hero();
+    hero13.Name = "Erika";
+    hero13.Caracteristique1 = 4;
+    hero13.Caracteristique2 = 4;
+    hero13.Id = 2;
+
+    var hero14 = new Hero();
+    hero14.Name = "Edmond";
+    hero14.Caracteristique1 = 4;
+    hero14.Caracteristique2 = 4;
+    hero14.Id = 3;
+
+    var hero15 = new Hero();
+    hero15.Name = "Bertrand";
+    hero15.Caracteristique1 = 0;
+    hero15.Caracteristique2 = 7;
+    hero15.Id = 4;
+
+    var hero16 = new Hero();
+    hero16.Name = "Berenice";
+    hero16.Caracteristique1 = 7;
+    hero16.Caracteristique2 = 0;
+    hero16.Id = 5;
+
+    player1.Heroes.push(hero11);
+    player1.Heroes.push(hero12);
+    player1.Heroes.push(hero13);
+    player1.Heroes.push(hero14);
+    player1.Heroes.push(hero15);
+    player1.Heroes.push(hero16);
+
+
+    /* Player 2 */
+    var player2 = new Player(ressources);
+    player2.AffiliationColor = 'red';
+
+    var hero21 = new Hero();
+    hero21.Name = "Tiffa";
+    hero21.Caracteristique1 = 2;
+    hero21.Caracteristique2 = 5;
+    hero21.Id = 6;
+
+    var hero22 = new Hero();
+    hero22.Name = "Tristan";
+    hero22.Caracteristique1 = 2;
+    hero22.Caracteristique2 = 5;
+    hero22.Id = 7;
+
+    var hero23 = new Hero();
+    hero23.Name = "Arielle";
+    hero23.Caracteristique1 = 2;
+    hero23.Caracteristique2 = 5;
+    hero23.Id = 8;
+
+    var hero24 = new Hero();
+    hero24.Name = "Arthur";
+    hero24.Caracteristique1 = 2;
+    hero24.Caracteristique2 = 5;
+    hero24.Id = 9;
+
+    var hero25 = new Hero();
+    hero25.Name = "Clara";
+    hero25.Caracteristique1 = 2;
+    hero25.Caracteristique2 = 5;
+    hero25.Id = 10;
+
+    var hero26 = new Hero();
+    hero26.Name = "Corantin";
+    hero26.Caracteristique1 = 2;
+    hero26.Caracteristique2 = 5;
+    hero26.Id = 11;
+
+    player2.Heroes.push(hero21);
+    player2.Heroes.push(hero22);
+    player2.Heroes.push(hero23);
+    player2.Heroes.push(hero24);
+    player2.Heroes.push(hero25);
+    player2.Heroes.push(hero26);
+
+
+    var testLand = new Shape('blue');
+    testLand.Points.push(new Position(77,10));
+    testLand.Points.push(new Position(105,19));
+    testLand.Points.push(new Position(125,25));
+    testLand.Points.push(new Position(122,42));
+    testLand.Points.push(new Position(129,47));
+    testLand.Points.push(new Position(140,40));
+    testLand.Points.push(new Position(141,63));
+    testLand.Points.push(new Position(117,62));
+    testLand.Points.push(new Position(120,88));
+    testLand.Points.push(new Position(134,74));
+    testLand.Points.push(new Position(146,90));
+    testLand.Points.push(new Position(129,95));
+    testLand.Points.push(new Position(139,106));
+    testLand.Points.push(new Position(124,125));
+    testLand.Points.push(new Position(132,138));
+    testLand.Points.push(new Position(120,139));
+    testLand.Points.push(new Position(109,134));
+    testLand.Points.push(new Position(94,142));
+    testLand.Points.push(new Position(68,130));
+    testLand.Points.push(new Position(62,90));
+    testLand.Points.push(new Position(70,80));
+    testLand.Points.push(new Position(44,84));
+    testLand.Points.push(new Position(58,72));
+    testLand.Points.push(new Position(33,61));
+    testLand.Points.push(new Position(69,58));
+    testLand.Points.push(new Position(77,10));
+
+    var otherShape = new Shape('red');
+    otherShape.Points.push(new Position(280, 25));
+    otherShape.Points.push(new Position(360, 38));
+    otherShape.Points.push(new Position(365, 110));
+    otherShape.Points.push(new Position(336, 86));
+    otherShape.Points.push(new Position(305, 225));
+    otherShape.Points.push(new Position(210, 122));
+    otherShape.Points.push(new Position(280, 25));
+
+    var continent = new Continent();
+    continent.BorderPoints.push(new Position(290, 117));
+    continent.BorderPoints.push(new Position(368, 98));
+    continent.BorderPoints.push(new Position(416, 96));
+    continent.BorderPoints.push(new Position(471, 65));
+    continent.BorderPoints.push(new Position(515, 99));
+    continent.BorderPoints.push(new Position(597, 92));
+    continent.BorderPoints.push(new Position(608, 170));
+    continent.BorderPoints.push(new Position(560, 190));
+    continent.BorderPoints.push(new Position(563, 262));
+    continent.BorderPoints.push(new Position(504, 282));
+    continent.BorderPoints.push(new Position(494, 318));
+    continent.BorderPoints.push(new Position(420, 340));
+    continent.BorderPoints.push(new Position(403, 387));
+    continent.BorderPoints.push(new Position(321, 371));
+    continent.BorderPoints.push(new Position(325, 333));
+    continent.BorderPoints.push(new Position(268, 316));
+    continent.BorderPoints.push(new Position(313, 274));
+    continent.BorderPoints.push(new Position(322, 238));
+    continent.BorderPoints.push(new Position(284, 234));
+    continent.BorderPoints.push(new Position(258, 200));
+
+    var state1 = new State();
+    state1.BorderPoints.push(new Position(322, 238));
+    state1.BorderPoints.push(new Position(284, 234));
+    state1.BorderPoints.push(new Position(258, 200));
+    state1.BorderPoints.push(new Position(290, 117));
+    state1.BorderPoints.push(new Position(368, 98));
+    state1.BorderPoints.push(new Position(416, 96));
+    state1.BorderPoints.push(new Position(401, 216));
+    state1.CurrentOwner = player1;
+
+    var state2 = new State();
+    state2.BorderPoints.push(new Position(416, 96));
+    state2.BorderPoints.push(new Position(471, 65));
+    state2.BorderPoints.push(new Position(515, 99));
+    state2.BorderPoints.push(new Position(478, 198));
+    state2.BorderPoints.push(new Position(401, 216));
+    state2.CurrentOwner = player1;
+
+    var state3 = new State();
+    state3.BorderPoints.push(new Position(515, 99));
+    state3.BorderPoints.push(new Position(597, 92));
+    state3.BorderPoints.push(new Position(608, 170));
+    state3.BorderPoints.push(new Position(560, 190));
+    state3.BorderPoints.push(new Position(478, 198));
+    state3.CurrentOwner = player1;
+
+    var state4 = new State();
+    state4.BorderPoints.push(new Position(560, 190));
+    state4.BorderPoints.push(new Position(563, 262));
+    state4.BorderPoints.push(new Position(504, 282));
+    state4.BorderPoints.push(new Position(494, 318));
+    state4.BorderPoints.push(new Position(420, 340));
+    state4.BorderPoints.push(new Position(442, 283));
+    state4.BorderPoints.push(new Position(458, 278));
+    state4.BorderPoints.push(new Position(487, 227));
+    state4.BorderPoints.push(new Position(478, 198));
+    state4.CurrentOwner = player1;
+
+    var state5 = new State();
+    state5.BorderPoints.push(new Position(420, 340));
+    state5.BorderPoints.push(new Position(367, 310));
+    state5.BorderPoints.push(new Position(370, 275));
+    state5.BorderPoints.push(new Position(321, 252));
+    state5.BorderPoints.push(new Position(322, 238));
+    state5.BorderPoints.push(new Position(401, 216));
+    state5.BorderPoints.push(new Position(478,198));
+    state5.BorderPoints.push(new Position(487, 227));
+    state5.BorderPoints.push(new Position(458, 278));
+    state5.BorderPoints.push(new Position(442, 283));
+    state5.CurrentOwner = player2;
+
+    var state6 = new State();
+    state6.BorderPoints.push(new Position(420, 340));
+    state6.BorderPoints.push(new Position(403, 387));
+    state6.BorderPoints.push(new Position(321, 371));
+    state6.BorderPoints.push(new Position(325, 333));
+    state6.BorderPoints.push(new Position(268, 316));
+    state6.BorderPoints.push(new Position(313, 274));
+    state6.BorderPoints.push(new Position(321, 252));
+    state6.BorderPoints.push(new Position(370, 275));
+    state6.BorderPoints.push(new Position(367, 310));
+    state6.CurrentOwner = player2;
+
+    continent.States.push(state1);
+    continent.States.push(state2);
+    continent.States.push(state3);
+    continent.States.push(state4);
+    continent.States.push(state5);
+    continent.States.push(state6);
+
+    var map = new Map();
+    map.Shapes.push(testLand);
+    map.Shapes.push(otherShape);
+
+    map.Continents.push(continent);
+
+    map.Context = context;
+
+    map.Draw();
+
+
+    var price1 = new Price();
+    price1.AddQuantityRessource(new QuantityOfRessource(ressources.GetRessourceByName("Minerai"), 10));
+    price1.AddQuantityRessource(new QuantityOfRessource(ressources.GetRessourceByName("Bois"), 20));
+
+    var price2 = new Price();
+    price2.AddQuantityRessource(new QuantityOfRessource(ressources.GetRessourceByName("Minerai"), 40));
+    price2.AddQuantityRessource(new QuantityOfRessource(ressources.GetRessourceByName("Bois"), 5));
+
+
+
+    var sysInfos = new SystemeInfos();
+    sysInfos.Canvas = canvas;
+    sysInfos.Map = map;
+    sysInfos.ExistingRessources = ressources;
+    sysInfos.ExistingModules = new Modules([
+        new Module(price1, 0, "./Content/imgs/modules/module1.jpg"),
+        new Module(price2, 1, "./Content/imgs/modules/module2.jpg")
+    ]);
+    sysInfos.Player = ko.observable(player1);
+
+    sysInfos.ExistingHeroes.push(hero11);
+    sysInfos.ExistingHeroes.push(hero12);
+    sysInfos.ExistingHeroes.push(hero13);
+    sysInfos.ExistingHeroes.push(hero14);
+    sysInfos.ExistingHeroes.push(hero15);
+    sysInfos.ExistingHeroes.push(hero16);
+    sysInfos.ExistingHeroes.push(hero21);
+    sysInfos.ExistingHeroes.push(hero22);
+    sysInfos.ExistingHeroes.push(hero23);
+    sysInfos.ExistingHeroes.push(hero24);
+    sysInfos.ExistingHeroes.push(hero25);
+    sysInfos.ExistingHeroes.push(hero26);
+
+// TODO :  ajouter notion de batiments du genre : école spécialisée pour la "civilisation" qui permet
+    // de train ses troupes spéciales: si accès à ce batiment, possibilité de recruter
+    // sinon non, mais possibilité toujours de construire son batiment spécial
+
+    // TODO: maintenant pour l'affectation à des missions il faut avoir des choses à affecter
+    // "héros" caracs score
+    // résolution actions
+
+    // TODO 04/01: Zone d'affectation dont présence dépend de mode
+    // => heros doivent avoir indicateur d'utilisation pendant le tour => si déjà utilisé, peut pas être affecté
+    // P=>Score affectation dont la force du score détermine une probabilité de réussite d'un certain rang : Score > 10 => 60% réussite grade B, Score > 20 => 50% réussite grade A, etc
+    // une fois qu'on a bien ça, on doit se pencher sur la méthode de résolution des actions =>
+    // établir les modalités de résolution, puis les résultats en fonction de la réussite ou non de l'opération
+
+    // TODO : stockage des ids des héros
+    // prendre des images pour représenter les héros
+    // ajouter la notion de statistiques une fois les affectation validables pour pouvoir gérer les notions de score
+    // essayer d'enjoliver l'affichage
+    // => ajout bouton valider dans affectation pour lancer l'action, on verra comment mieux arranger tout ça plus tard
+    // => de même pour l'instant on veut qqchose qui fonctionne vite donc éventuellement hardcoder les différents types d'actions possibles
+
+    // TODO 05/01: implémentation action exploration :
+    // => débloque sous certaines conditions des actions dans les états:
+    //   - perso à recruter
+    //   - lieu à visiter
+    //   - etc.
+    // quand on lance une action d'exploration, il nous faut connaître le pays que l'on explore puisque c'est lui qui
+    // va avoir une liste d'actions "bloquées/débloquées"
+
+    ko.applyBindings(sysInfos);
 </script>
 </body>
 </html>
